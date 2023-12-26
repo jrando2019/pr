@@ -4,6 +4,8 @@ Este script en Python está diseñado para ejecutarse en una Raspberry Pi y se c
 
 ## Circuito 🔋
 
+![image](https://github.com/jrando2019/pr/assets/92480215/8bedac22-a7c2-4f45-81a7-a0dda9a308e3)
+
 ## Video 🎥
 
 Link -> [Video p7 🌱](https://urjc-my.sharepoint.com/:v:/g/personal/j_rando_2019_alumnos_urjc_es/EZVOeQH7JU9NtNICULWBm4ABM6OLeIcLRRN6l4jsbZKfSA?e=XasetT)
