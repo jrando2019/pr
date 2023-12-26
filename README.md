@@ -1,120 +1,47 @@
-## README
+# Sensor de Humedad 🌱 (Práctica 7)
 
-### MQTT Graph Data Processor
+Este script en Python está diseñado para ejecutarse en una Raspberry Pi y se conecta con un sensor de humedad del suelo para monitorear el nivel de humedad del sustrato de una planta. Cuando la humedad del suelo cae por debajo de un umbral determinado, se activa una indicación de que la planta necesita ser regada.
 
-This Node.js script acts as an MQTT client, handling and processing incoming graph data messages. The processed data is then published to different MQTT topics. The main goal is to manage BTC (Bitcoin) graph data, specifically torque, angle, and current data.
+## Circuito 🔋
 
-#### Requirements
+## Video 🎥
 
-- **Node.js**: Make sure you have Node.js installed.
-- **MQTT Broker**: Ensure that an MQTT broker is running at `mqtt://mqtt-broker:1883`. You can customize the broker URL and configuration in the script.
-- 
-#### Code Walkthrough
+Link -> [Video p7 🌱](https://urjc-my.sharepoint.com/:v:/g/personal/j_rando_2019_alumnos_urjc_es/EZVOeQH7JU9NtNICULWBm4ABM6OLeIcLRRN6l4jsbZKfSA?e=XasetT)
 
-1. **MQTT Connection Setup:**
+## Explicación del código
 
-   ```javascript
-   const client = mqtt.connect('mqtt://mqtt-broker:1883', {
-     reconnectPeriod: 5000, // Reconnect every 5 seconds
-   });
-   ```
+### Importación de módulos:
 
-   Set up the MQTT connection with the specified broker and configuration.
+- Se importa el módulo `RPi.GPIO` para interactuar con los pines GPIO de la Raspberry Pi.
+- También se importan los módulos `signal`, `sys` y `time` para gestionar señales, realizar operaciones del sistema y pausar la ejecución, respectivamente.
 
-2. **Message Subscription:**
+### Definición de constantes:
 
-   ```javascript
-   client.subscribe('BTC/notifications/BTC.graphdata', (err) => {
-     if (!err) {
-       console.log('Subscribed to BTC/notifications/BTC.graphdata');
-     }
-   });
-   ```
+- `ENTRADA_SENSOR`, `LED_LISTO`, y `LED_INDICADOR` representan los números de pin GPIO utilizados para el sensor de humedad y los LEDs de indicación.
 
-   Subscribe to the 'BTC/notifications/BTC.graphdata' topic to receive incoming graph data messages.
+### Variables globales:
 
-3. **Data Parsing:**
-   
-    The script begins by attempting to parse the incoming JSON message:
-   
-    ```javascript
-    try {
-    if (topic === 'BTC/notifications/BTC.graphdata') {
-        // Data parsing and transformation logic goes here
-        // ...
-     }
-    } catch (error) {
-    console.error('An error occurred:', error);
-    // Handle the error as needed, and optionally continue processing
-    }
-    ```
-    
-    If the topic matches 'BTC/notifications/BTC.graphdata', it proceeds with parsing the JSON message. Any errors during this process are caught and logged.
+- `water` se utiliza para almacenar el estado actual de la humedad del suelo.
 
-5. **Graph Data Processing:**
-   
-    The core of the data processing logic involves extracting parameters and iterating through the graph data to convert raw values into meaningful torque, angle, and current data:
+### Función de devolución de llamada (`callbackHumedad`):
 
-    ```javascript
-    const graph = inputData.params;
-    let col2factor;
-    let range;
-    let sample_rate = 1000 / graph.sample_rate;
+- Esta función se ejecuta cuando hay un cambio en el estado del sensor de humedad.
+- Invierte el valor de la variable global `water`.
 
-    switch (graph.col2factor) {
-    // ... switch cases for col2factor
-    }
+### Configuración inicial (`setup`):
 
-    switch (graph.range) {
-    // ... switch cases for range
-    }
+- Configura los pines GPIO, establece el modo de numeración BCM, y configura los pines como entrada o salida según sea necesario.
+- Enciende el LED_LISTO para indicar que el sistema está listo.
+- Configura la detección de eventos en el pin del sensor de humedad (`ENTRADA_SENSOR`) llamando a `callbackHumedad` con un tiempo de rebote de 300 ms.
 
-    // ... data extraction and transformation logic
+### Función principal (`main`):
 
-    for (let i = 0; i < graph.cols; i++) {
-        let curvData = [];
-        // ... loop through graph data and process curves
-        curveObjects.push(curveObject);
-    }
-    ```
+- Llama a la función `setup` para la configuración inicial.
+- Inicializa la variable `an_water` para realizar un seguimiento del estado anterior del agua.
+- En un bucle infinito, compara el estado actual del agua con el estado anterior y realiza acciones en consecuencia.
+- Muestra mensajes en la consola y enciende o apaga el LED_INDICADOR según la necesidad de riego.
+- Espera 0.1 segundos antes de la siguiente iteración.
 
-    Parameters like `col2factor`, `range`, and `sample_rate` are extracted from the incoming graph data. Switch cases are employed to determine appropriate scaling factors.
+### Punto de entrada principal (`if __name__ == '__main__':`):
 
-    Inside the loop, the script iterates through each curve in the graph data, processing torque, angle, and current values based on the curve type.
-
-4. **Publication to MQTT Topics:**
-
-    Once the data is processed, the script publishes the results to respective MQTT topics:
-
-    ```javascript
-    // Publish the processed data to respective MQTT topics
-    const torqueData = JSON.stringify(curveObjects[0]);
-    const angleData = JSON.stringify(curveObjects[1]);
-    const currentData = JSON.stringify(curveObjects[2]);
-
-    client.publish('BTC/notifications/BTC.graphtorque', torqueData);
-    client.publish('BTC/notifications/BTC.graphangle', angleData);
-    client.publish('BTC/notifications/BTC.graphcurrent', currentData);
-    ```
-
-    The processed torque, angle, and current data are converted to JSON strings and published to their corresponding MQTT topics.
-
-    Feel free to explore and customize this data processing logic based on your specific graph data structure and processing requirements. Adjusting switch cases, scaling factors, or adding custom processing steps can tailor the script to your needs.
-
-4. **Error Handling:**
-
-   ```javascript
-   client.on('error', (error) => {
-     console.error('MQTT Error:', error);
-     // Handle the error as needed, and optionally exit with an error code
-     process.exit(1);
-   });
-
-   client.on('close', () => {
-     console.log('MQTT Connection closed');
-   });
-   ```
-
-   Log MQTT connection errors and close events, providing feedback in case of issues.
-
-   Feel free to explore the script, customize MQTT connection parameters, and adapt the data processing logic based on your specific use case.
+- Llama a la función `main` cuando se ejecuta el script.
